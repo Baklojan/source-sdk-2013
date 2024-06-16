@@ -19,6 +19,7 @@ ipch
 *.idb
 *.vcxproj
 .vs
+.vs/
 .vscode
 *.sln
 
@@ -126,3 +127,9 @@ config.cfg
 
 # shader files
 *.tmp
+
+*.vpc.sentinel
+*.vcxproj*
+[Dd]ebug*/
+[Rr]elease*/
+*.pdb
