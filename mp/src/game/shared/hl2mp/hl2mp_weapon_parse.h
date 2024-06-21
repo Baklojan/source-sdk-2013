@@ -25,6 +25,7 @@ public:
 	
 	virtual void Parse( ::KeyValues *pKeyValuesData, const char *szWeaponName );
 
+	float		roundsPerMinute;
 
 public:
 

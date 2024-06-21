@@ -58,6 +58,11 @@ public:
 	CHL2MPSWeaponInfo const	&GetHL2MPWpnData() const;
 
 
+	inline float		GetFireRate()
+	{
+		return GetHL2MPWpnData().roundsPerMinute;
+	}
+
 	virtual void FireBullets( const FireBulletsInfo_t &info );
 	virtual void FallInit( void );
 	

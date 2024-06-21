@@ -269,8 +269,16 @@ void CWeaponHL2MPBase::FallInit( void )
 #endif
 }
 
+
+//-----------------------------------------------------------------------------
+// Purpose: Get data in the file weapon info array
+//-----------------------------------------------------------------------------
 const CHL2MPSWeaponInfo &CWeaponHL2MPBase::GetHL2MPWpnData() const
 {
+	{
+		return (CHL2MPSWeaponInfo&)GetWpnData();
+	}
+
 	const FileWeaponInfo_t *pWeaponInfo = &GetWpnData();
 	const CHL2MPSWeaponInfo *pHL2MPInfo;
 
