@@ -290,6 +290,15 @@ public:
 	virtual bool			AutoFiresFullClip( void ) const { return false; }
 	virtual void			UpdateAutoFire( void );
 
+#ifdef CLIENT_DLL
+	// Muzzleflash Scripts
+	int						GetMuzzleFlashFOV(void) const;
+	float					GetMuzzleFlashColorMax(void) const;
+	float					GetMuzzleFlashColorMin(void) const;
+	int						GetMuzzleFlashFarZ(void) const;
+	bool					HasMuzzleFlash(void) const;
+#endif
+
 	// Weapon firing
 	virtual void			PrimaryAttack( void );						// do "+ATTACK"
 	virtual void			SecondaryAttack( void ) { return; }			// do "+ATTACK2"
@@ -332,7 +341,7 @@ public:
 
 	virtual void			AddViewKick( void );	// Add in the view kick for the weapon
 
-	virtual char			*GetDeathNoticeName( void );	// Get the string to print death notices with
+	virtual const char			*GetDeathNoticeName( void );	// Get the string to print death notices with
 
 	CBaseCombatCharacter	*GetOwner() const;
 	void					SetOwner( CBaseCombatCharacter *owner );

@@ -145,6 +145,9 @@ public:
 	// Should this object receive shadows?
 	virtual bool			ShouldReceiveProjectedTextures( int flags )
 	{
+		if (GetOwner() && GetOwner() == C_BasePlayer::GetLocalPlayer())
+			return !(GetOwner()->IsEffectActive(EF_DIMLIGHT) || C_BasePlayer::GetLocalPlayer()->ShouldDisplayMuzzleLight());
+
 		return false;
 	}
 

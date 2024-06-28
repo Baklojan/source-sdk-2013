@@ -5,7 +5,7 @@ rem ================================
 rem ==== MOD PATH CONFIGURATIONS ===
 
 rem == Set the absolute path to your mod's game directory here ==
-set GAMEDIR=%cd%\..\..\..\game\mod_hl2mp
+set GAMEDIR=C:\Users\Baklojan\Documents\Github\source-sdk-2013\mp\game\mod_hl2mp
 
 rem == Set the relative or absolute path to Source SDK Base 2013 Singleplayer\bin ==
 set SDKBINDIR=C:\SteamBetaLibrary\SteamApps\common\Source SDK Base 2013 Singleplayer\bin
