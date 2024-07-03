@@ -24,7 +24,7 @@ public:
 
 	DECLARE_CLIENTCLASS();
 
-	void OnDataChanged(DataUpdateType_t updateType);
+	void OnDataChanged( DataUpdateType_t updateType );
 	bool ShouldDraw();
 
 private:
@@ -32,13 +32,15 @@ private:
 	color32 m_shadowColor;
 	float m_flShadowMaxDist;
 	bool m_bDisableShadows;
+	bool m_bEnableLocalLightShadows;
 };
 
-IMPLEMENT_CLIENTCLASS_DT(C_ShadowControl, DT_ShadowControl, CShadowControl)
-	RecvPropVector(RECVINFO(m_shadowDirection)),
-	RecvPropInt(RECVINFO(m_shadowColor)),
-	RecvPropFloat(RECVINFO(m_flShadowMaxDist)),
-	RecvPropBool(RECVINFO(m_bDisableShadows)),
+IMPLEMENT_CLIENTCLASS_DT( C_ShadowControl, DT_ShadowControl, CShadowControl )
+	RecvPropVector( RECVINFO( m_shadowDirection ) ),
+	RecvPropInt( RECVINFO( m_shadowColor ), 0, RecvProxy_Int32ToColor32 ),
+	RecvPropFloat( RECVINFO( m_flShadowMaxDist ) ),
+	RecvPropBool( RECVINFO( m_bDisableShadows ) ),
+	RecvPropBool( RECVINFO( m_bEnableLocalLightShadows ) ),
 END_RECV_TABLE()
 
 
@@ -54,6 +56,7 @@ void C_ShadowControl::OnDataChanged(DataUpdateType_t updateType)
 	g_pClientShadowMgr->SetShadowColor( m_shadowColor.r, m_shadowColor.g, m_shadowColor.b );
 	g_pClientShadowMgr->SetShadowDistance( m_flShadowMaxDist );
 	g_pClientShadowMgr->SetShadowsDisabled( m_bDisableShadows );
+	g_pClientShadowMgr->SetShadowFromWorldLightsEnabled( m_bEnableLocalLightShadows );
 }
 
 //------------------------------------------------------------------------------
@@ -63,4 +66,3 @@ bool C_ShadowControl::ShouldDraw()
 {
 	return false;
 }
-

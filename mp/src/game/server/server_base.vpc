@@ -830,6 +830,7 @@ $Project
 		$File	"$SRCDIR\game\shared\entitydatainstantiator.h"
 		$File	"$SRCDIR\game\shared\entitylist_base.h"
 		$File	"$SRCDIR\game\shared\env_detail_controller.h"
+		$File	"env_projectedtexture.h"
 		$File	"EventLog.h"
 		$File	"$SRCDIR\game\shared\expressionsample.h"
 		$File	"$SRCDIR\public\tier0\fasttimer.h"
