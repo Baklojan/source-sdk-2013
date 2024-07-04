@@ -99,8 +99,6 @@ static ConVar r_shadowfromworldlights_debug( "r_shadowfromworldlights_debug", "0
 static ConVar r_shadow_shortenfactor( "r_shadow_shortenfactor", "2", 0, "Makes shadows cast from local lights shorter" );
 static ConVar r_flashlight_version2( "r_flashlight_version2", "0", FCVAR_CHEAT | FCVAR_DEVELOPMENTONLY );
 
-static void HalfUpdateRateCallback( IConVar *var, const char *pOldValue, float flOldValue);
-static ConVar r_shadow_half_update_rate( "r_shadow_half_update_rate", IsX360() ? "1" : "0", 0, "Updates shadows at half the framerate", HalfUpdateRateCallback );
 
 static ConVar r_shadow_debug_spew( "r_shadow_debug_spew", "0", FCVAR_CHEAT );
 
@@ -3091,11 +3089,6 @@ bool CClientShadowMgr::ShouldUseParentShadow( IClientRenderable *pRenderable )
 //-----------------------------------------------------------------------------
 void CClientShadowMgr::PreRender()
 {
-	// only update shadows once per frame
-	Assert( gpGlobals->framecount != m_nPrevFrameCount );
-	m_nPrevFrameCount = gpGlobals->framecount;
-
-	Msg("%i\n", m_nPrevFrameCount);
 
 	VPROF_BUDGET( "CClientShadowMgr::PreRender", VPROF_BUDGETGROUP_SHADOW_RENDERING );
 	MDLCACHE_CRITICAL_SECTION();
@@ -3164,11 +3157,6 @@ void CClientShadowMgr::PreRender()
 
 	m_bUpdatingDirtyShadows = true;
 
-	if ( r_shadow_half_update_rate.GetBool() )
-	{
-		UpdateDirtyShadowsHalfRate();
-	}
-	else
 	{
 		UpdateDirtyShadows();
 	}
