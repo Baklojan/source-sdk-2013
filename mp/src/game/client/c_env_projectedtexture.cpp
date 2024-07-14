@@ -10,6 +10,7 @@
 #include "shareddefs.h"
 #include "materialsystem/imesh.h"
 #include "materialsystem/imaterial.h"
+#include "materialsystem/itexture.h"
 #include "view.h"
 #include "iviewrender.h"
 #include "view_shared.h"
@@ -21,11 +22,15 @@
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
+static ConVar mat_slopescaledepthbias_shadowmap("mat_slopescaledepthbias_shadowmap", "16", FCVAR_CHEAT);
+static ConVar mat_depthbias_shadowmap("mat_depthbias_shadowmap", "0.00001", FCVAR_CHEAT);
+
 float C_EnvProjectedTexture::m_flVisibleBBoxMinHeight = -FLT_MAX;
 
 
 IMPLEMENT_CLIENTCLASS_DT( C_EnvProjectedTexture, DT_EnvProjectedTexture, CEnvProjectedTexture )
 	RecvPropEHandle(	RECVINFO( m_hTargetEntity ) ),
+	RecvPropBool(		RECVINFO( m_bDontFollowTarget ) ),
 	RecvPropBool(		RECVINFO( m_bState ) ),
 	RecvPropBool(		RECVINFO( m_bAlwaysUpdate ) ),
 	RecvPropFloat(		RECVINFO( m_flLightFOV ) ),
@@ -42,6 +47,7 @@ IMPLEMENT_CLIENTCLASS_DT( C_EnvProjectedTexture, DT_EnvProjectedTexture, CEnvPro
 	RecvPropFloat(		RECVINFO( m_flNearZ ) ),
 	RecvPropFloat(		RECVINFO( m_flFarZ ) ),
 	RecvPropInt(		RECVINFO( m_nShadowQuality ) ),
+	RecvPropBool(		RECVINFO( m_bAlwaysDraw ) ),
 END_RECV_TABLE()
 
 C_EnvProjectedTexture *C_EnvProjectedTexture::Create()
@@ -65,6 +71,7 @@ C_EnvProjectedTexture *C_EnvProjectedTexture::Create()
 	pEnt->SetAbsAngles( QAngle( 90, 0, 0 ) );
 	pEnt->m_bAlwaysUpdate = true;
 	pEnt->m_bState = true;
+	pEnt->m_bAlwaysDraw = false;
 
 	return pEnt;
 }
@@ -107,6 +114,14 @@ void C_EnvProjectedTexture::OnDataChanged( DataUpdateType_t updateType )
 	if ( updateType == DATA_UPDATE_CREATED )
 	{
 		m_SpotlightTexture.Init( m_SpotlightTextureName, TEXTURE_GROUP_OTHER, true );
+	}
+	else //if ( updateType == DATA_UPDATE_DATATABLE_CHANGED )
+	{
+		// It could've been changed via input
+		if (!FStrEq(m_SpotlightTexture->GetName(), m_SpotlightTextureName))
+		{
+			m_SpotlightTexture.Init(m_SpotlightTextureName, TEXTURE_GROUP_OTHER, true);
+		}
 	}
 
 	m_bForceUpdate = true;
@@ -158,7 +173,7 @@ void C_EnvProjectedTexture::UpdateLight( void )
 		Vector vForward, vRight, vUp, vPos = GetAbsOrigin();
 		FlashlightState_t state;
 
-		if ( m_hTargetEntity != NULL )
+		if ( m_hTargetEntity != NULL && !m_bDontFollowTarget )
 		{
 			if ( m_bCameraSpace )
 			{
@@ -301,15 +316,20 @@ void C_EnvProjectedTexture::UpdateLight( void )
 		state.m_fQuadraticAtten = 0.0;
 		state.m_fLinearAtten = 100;
 		state.m_fConstantAtten = 0.0f;
+		state.m_FarZAtten = m_flFarZ;
 		state.m_Color[0] = ( m_CurrentLinearFloatLightColor.x * ( 1.0f / 255.0f ) * flAlpha ) * m_flBrightnessScale;
 		state.m_Color[1] = ( m_CurrentLinearFloatLightColor.y * ( 1.0f / 255.0f ) * flAlpha ) * m_flBrightnessScale;
 		state.m_Color[2] = ( m_CurrentLinearFloatLightColor.z * ( 1.0f / 255.0f ) * flAlpha ) * m_flBrightnessScale;
 		state.m_Color[3] = 0.0f; // fixme: need to make ambient work m_flAmbient;
+		state.m_flShadowSlopeScaleDepthBias = mat_slopescaledepthbias_shadowmap.GetFloat();
+		state.m_flShadowDepthBias = mat_depthbias_shadowmap.GetFloat();
 		state.m_bEnableShadows = m_bEnableShadows;
 		state.m_pSpotlightTexture = m_SpotlightTexture;
 		state.m_nSpotlightTextureFrame = m_nSpotlightTextureFrame;
 
 		state.m_nShadowQuality = m_nShadowQuality; // Allow entity to affect shadow quality
+
+		state.m_bAlwaysDraw = m_bAlwaysDraw;
 
 		if( m_LightHandle == CLIENTSHADOW_INVALID_HANDLE )
 		{
@@ -358,6 +378,9 @@ void C_EnvProjectedTexture::Simulate( void )
 
 bool C_EnvProjectedTexture::IsBBoxVisible( Vector vecExtentsMin, Vector vecExtentsMax )
 {
+	if (m_bAlwaysDraw)
+		return true;
+
 	// Z position clamped to the min height (but must be less than the max)
 	float flVisibleBBoxMinHeight = MIN( vecExtentsMax.z - 1.0f, m_flVisibleBBoxMinHeight );
 	vecExtentsMin.z = MAX( vecExtentsMin.z, flVisibleBBoxMinHeight );

@@ -15,6 +15,7 @@ LINK_ENTITY_TO_CLASS( env_projectedtexture, CEnvProjectedTexture );
 
 BEGIN_DATADESC(CEnvProjectedTexture)
 	DEFINE_FIELD(m_hTargetEntity, FIELD_EHANDLE),
+	DEFINE_KEYFIELD(m_bDontFollowTarget, FIELD_BOOLEAN, "dontfollowtarget"),
 	DEFINE_FIELD(m_bState, FIELD_BOOLEAN),
 	DEFINE_KEYFIELD(m_flLightFOV, FIELD_FLOAT, "lightfov"),
 	DEFINE_KEYFIELD(m_bEnableShadows, FIELD_BOOLEAN, "enableshadows"),
@@ -22,11 +23,12 @@ BEGIN_DATADESC(CEnvProjectedTexture)
 	DEFINE_KEYFIELD(m_bLightWorld, FIELD_BOOLEAN, "lightworld"),
 	DEFINE_KEYFIELD(m_bCameraSpace, FIELD_BOOLEAN, "cameraspace"),
 	DEFINE_KEYFIELD(m_flAmbient, FIELD_FLOAT, "ambient"),
-	DEFINE_AUTO_ARRAY_KEYFIELD(m_SpotlightTextureName, FIELD_CHARACTER, "texturename"),
+	DEFINE_AUTO_ARRAY(m_SpotlightTextureName, FIELD_CHARACTER),
 	DEFINE_KEYFIELD(m_nSpotlightTextureFrame, FIELD_INTEGER, "textureframe"),
 	DEFINE_KEYFIELD(m_flNearZ, FIELD_FLOAT, "nearz"),
 	DEFINE_KEYFIELD(m_flFarZ, FIELD_FLOAT, "farz"),
 	DEFINE_KEYFIELD(m_nShadowQuality, FIELD_INTEGER, "shadowquality"),
+	DEFINE_KEYFIELD(m_bAlwaysDraw, FIELD_BOOLEAN, "alwaysdraw"),
 	DEFINE_KEYFIELD(m_flBrightnessScale, FIELD_FLOAT, "brightnessscale"),
 	DEFINE_FIELD(m_LightColor, FIELD_COLOR32),
 	DEFINE_KEYFIELD(m_flColorTransitionTime, FIELD_FLOAT, "colortransitiontime"),
@@ -44,11 +46,15 @@ BEGIN_DATADESC(CEnvProjectedTexture)
 	DEFINE_INPUTFUNC(FIELD_COLOR32, "LightColor", InputSetLightColor),
 	DEFINE_INPUTFUNC(FIELD_FLOAT, "Ambient", InputSetAmbient),
 	DEFINE_INPUTFUNC(FIELD_STRING, "SpotlightTexture", InputSetSpotlightTexture),
+	DEFINE_INPUTFUNC(FIELD_VOID, "AlwaysDrawOn", InputAlwaysDrawOn),
+	DEFINE_INPUTFUNC(FIELD_VOID, "StopFollowingTarget", InputStopFollowingTarget),
+	DEFINE_INPUTFUNC(FIELD_VOID, "StartFollowingTarget", InputStartFollowingTarget),
 	DEFINE_THINKFUNC(InitialThink),
 END_DATADESC()
 
 IMPLEMENT_SERVERCLASS_ST(CEnvProjectedTexture, DT_EnvProjectedTexture)
 	SendPropEHandle(SENDINFO(m_hTargetEntity)),
+	SendPropBool(SENDINFO(m_bDontFollowTarget)),
 	SendPropBool(SENDINFO(m_bState)),
 	SendPropBool(SENDINFO(m_bAlwaysUpdate)),
 	SendPropFloat(SENDINFO(m_flLightFOV)),
@@ -65,6 +71,7 @@ IMPLEMENT_SERVERCLASS_ST(CEnvProjectedTexture, DT_EnvProjectedTexture)
 	SendPropFloat(SENDINFO(m_flNearZ), 16, SPROP_ROUNDDOWN, 0.0f, 500.0f),
 	SendPropFloat(SENDINFO(m_flFarZ), 18, SPROP_ROUNDDOWN, 0.0f, 1500.0f),
 	SendPropInt(SENDINFO(m_nShadowQuality), 1, SPROP_UNSIGNED),  // Just one bit for now
+	SendPropBool(SENDINFO(m_bDontFollowTarget)),
 END_SEND_TABLE()
 
 //-----------------------------------------------------------------------------
@@ -111,8 +118,9 @@ bool CEnvProjectedTexture::KeyValue( const char *szKeyName, const char *szValue 
 {
 	if ( FStrEq( szKeyName, "lightcolor" ) )
 	{
-		float tmp[4];
-		UTIL_StringToFloatArray( tmp, 4, szValue );
+		int tmp[4];
+		tmp[3] = 255;
+		UTIL_StringToIntArray_PreserveArray( tmp, 4, szValue );
 
 		m_LightColor.SetR( tmp[0] );
 		m_LightColor.SetG( tmp[1] );
@@ -220,6 +228,16 @@ void CEnvProjectedTexture::InputSetAmbient( inputdata_t &inputdata )
 void CEnvProjectedTexture::InputSetSpotlightTexture( inputdata_t &inputdata )
 {
 	Q_strcpy( m_SpotlightTextureName.GetForModify(), inputdata.value.String() );
+}
+
+void CEnvProjectedTexture::InputSetSpotlightFrame(inputdata_t& inputdata)
+{
+	m_nSpotlightTextureFrame = inputdata.value.Int();
+}
+
+void CEnvProjectedTexture::Spawn(void)
+{
+	BaseClass::Spawn();
 }
 
 void CEnvProjectedTexture::Activate( void )

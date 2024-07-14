@@ -24,6 +24,7 @@ class C_EnvProjectedTexture : public C_BaseEntity
 public:
 	DECLARE_CLIENTCLASS();
 
+	void SetMaterial( IMaterial *pMaterial );
 	void SetLightColor( byte r, byte g, byte b, byte a );
 
 	virtual void OnDataChanged( DataUpdateType_t updateType );
@@ -31,7 +32,7 @@ public:
 
 	virtual void Simulate();
 
-	void	UpdateLight( void );
+	void	UpdateLight();
 
 	C_EnvProjectedTexture();
 	~C_EnvProjectedTexture();
@@ -49,6 +50,8 @@ private:
 	bool m_bForceUpdate;
 
 	EHANDLE		m_hTargetEntity;
+
+	bool		m_bDontFollowTarget;
 
 	bool		m_bState;
 	bool		m_bAlwaysUpdate;
@@ -69,6 +72,8 @@ private:
 	CTextureReference m_SpotlightTexture;
 	int			m_nSpotlightTextureFrame;
 	int			m_nShadowQuality;
+
+	bool		m_bAlwaysDraw;
 
 	Vector		m_vecExtentsMin;
 	Vector		m_vecExtentsMax;

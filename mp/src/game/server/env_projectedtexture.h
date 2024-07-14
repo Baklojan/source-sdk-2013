@@ -23,6 +23,7 @@ public:
 
 	// Always transmit to clients
 	virtual int UpdateTransmitState();
+	virtual void Spawn(void);
 	virtual void Activate( void );
 
 	void InputTurnOn( inputdata_t &inputdata );
@@ -39,9 +40,16 @@ public:
 	void InputSetSpotlightTexture( inputdata_t &inputdata );
 	void InputSetAmbient( inputdata_t &inputdata );
 
+	void InputSetSpotlightFrame(inputdata_t &inputdata);
+	void InputAlwaysDrawOn(inputdata_t &inputdata) { m_bAlwaysDraw = true; }
+	void InputAlwaysDrawOff(inputdata_t &inputdata) { m_bAlwaysDraw = false; }
+	void InputStopFollowingTarget(inputdata_t &inputdata) { m_bDontFollowTarget = true; }
+	void InputStartFollowingTarget(inputdata_t &inputdata) { m_bDontFollowTarget = false; }
+
 	void InitialThink( void );
 
 	CNetworkHandle( CBaseEntity, m_hTargetEntity );
+	CNetworkVar(bool, m_bDontFollowTarget);
 
 private:
 
@@ -61,6 +69,7 @@ private:
 	CNetworkVar( float, m_flNearZ );
 	CNetworkVar( float, m_flFarZ );
 	CNetworkVar( int, m_nShadowQuality );
+	CNetworkVar(bool, m_bAlwaysDraw);
 
 };
 
