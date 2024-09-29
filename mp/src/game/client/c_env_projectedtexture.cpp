@@ -26,6 +26,7 @@ float C_EnvProjectedTexture::m_flVisibleBBoxMinHeight = -FLT_MAX;
 IMPLEMENT_CLIENTCLASS_DT( C_EnvProjectedTexture, DT_EnvProjectedTexture, CEnvProjectedTexture )
 	RecvPropEHandle( RECVINFO( m_hTargetEntity )	),
 	RecvPropBool(	 RECVINFO( m_bState )			),
+	RecvPropBool(	 RECVINFO( m_bAlwaysUpdate )	),
 	RecvPropFloat(	 RECVINFO( m_flLightFOV )		),
 	RecvPropBool(	 RECVINFO( m_bEnableShadows )	),
 	RecvPropBool(	 RECVINFO( m_bLightOnlyTarget )	),
